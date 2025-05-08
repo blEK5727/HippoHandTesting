@@ -25,7 +25,9 @@ final class HandTrackingModel {
     var myHandAnchor = ModelEntity()
     var lerpFactor: CGFloat = 1.0
     var isHandTracked: Bool = false
+    var isPalmDown: Bool = false
     var attachmentEntity: ViewAttachmentEntity?
+    var palmDownAttachmentEntity: ViewAttachmentEntity?
     var attachmentParent = Entity()
     let session = ARKitSession()
     
@@ -58,17 +60,49 @@ final class HandTrackingModel {
     
     func updateHandMenuVisibility(for handAnchor: HandAnchor?) {
         guard let handAnchor = handAnchor,
-              let handLocation = getLeftHandPointPosition(handAnchor: handAnchor) else { return }
+              let handLocation = getLeftHandPointPosition(handAnchor: handAnchor) else {
+            print("❌ No hand anchor or location available")
+            return
+        }
         
         myHandAnchor.setTransformMatrix(handLocation, relativeTo: nil)
         updateEntityPositionUsingLerp(entityAttachment: attachmentParent, target: myHandAnchor)
+        
+        // Check for palm facing forward
         isHandTracked = checkHandRotation(myHandAnchor.transform.rotation.axis)
         attachmentEntity?.isEnabled = isHandTracked
+        
+        // Check for palm facing down
+        isPalmDown = checkPalmDownRotation(myHandAnchor.transform.rotation.axis)
+        palmDownAttachmentEntity?.isEnabled = isPalmDown
+        
+        // Debug prints
+        print("📱 Hand Tracking Debug:")
+        print("   - Hand Tracked: \(isHandTracked)")
+        print("   - Palm Down: \(isPalmDown)")
+        print("   - Rotation Axis: \(myHandAnchor.transform.rotation.axis)")
+        print("   - Palm Down Entity Enabled: \(palmDownAttachmentEntity?.isEnabled ?? false)")
     }
     
     private func checkHandRotation(_ axis: SIMD3<Float>) -> Bool {
         let front = axis.x.isBetween(-0.2, 0.8) && axis.y.isBetween(-0.4, 0.9) && axis.z.isBetween(-0.2, 1)
+        print("🖐️ Palm Forward Check:")
+        print("   - X: \(axis.x) isBetween -0.2 and 0.8: \(axis.x.isBetween(-0.2, 0.8))")
+        print("   - Y: \(axis.y) isBetween -0.4 and 0.9: \(axis.y.isBetween(-0.4, 0.9))")
+        print("   - Z: \(axis.z) isBetween -0.2 and 1: \(axis.z.isBetween(-0.2, 1))")
         return front
+    }
+    
+    private func checkPalmDownRotation(_ axis: SIMD3<Float>) -> Bool {
+        // Adjusted values to detect when palm is completely facing down
+        let palmDown = axis.x.isBetween(0.7, 1.0) &&
+                      axis.y.isBetween(0.3, 0.7) &&
+                      axis.z.isBetween(-0.7, -0.3)
+        print("👇 Palm Down Check:")
+        print("   - X: \(axis.x) isBetween 0.7 and 1.0: \(axis.x.isBetween(0.7, 1.0))")
+        print("   - Y: \(axis.y) isBetween 0.3 and 0.7: \(axis.y.isBetween(0.3, 0.7))")
+        print("   - Z: \(axis.z) isBetween -0.7 and -0.3: \(axis.z.isBetween(-0.7, -0.3))")
+        return palmDown
     }
     
     func getLeftHandPointPosition(handAnchor: HandAnchor?) -> simd_float4x4? {

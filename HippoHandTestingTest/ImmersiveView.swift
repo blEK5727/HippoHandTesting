@@ -24,12 +24,36 @@ struct ImmersiveView: View {
                 handTrackingModel.attachmentEntity = attachment_hand_Menu
                 handTrackingModel.attachmentParent.addChild(handTrackingModel.attachmentEntity!)
             }
+            
+            if let attachment_palm_down = attachments.entity(for: "palm_down") {
+                content.add(attachment_palm_down)
+                attachment_palm_down.scale = [0.6, 0.6, 0.6]
+                attachment_palm_down.position = handTrackingModel.attachmentParent.position
+                handTrackingModel.palmDownAttachmentEntity = attachment_palm_down
+                handTrackingModel.attachmentParent.addChild(handTrackingModel.palmDownAttachmentEntity!)
+            }
         }
         attachments: {
             Attachment(id: "hand_menu") {
                 HandMenuView()
-                    .frame(width: 400, height: 600)
-                    .glassBackgroundEffect()
+                    //.frame(width: 400, height: 600)
+                    //.glassBackgroundEffect()
+                    .buttonStyle(.plain)
+            }
+            
+            Attachment(id: "palm_down") {
+                PalmDownView(task: TaskItem(
+                    title: "Sample Task",
+                    description: "This is a sample task",
+                    location: "Sample Location",
+                    tag: "Sample Tag",
+                    date: Date(),
+                    startTime: Date(),
+                    endTime: Date().addingTimeInterval(3600),
+                    type: .task
+                ))
+                    //.frame(width: 400, height: 600)
+                    //.glassBackgroundEffect()
             }
         }.onAppear() {
             Task {
