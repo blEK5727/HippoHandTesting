@@ -8,12 +8,12 @@
 
 import Foundation
 import SwiftUI
+import Combine
 
-@Observable
-class TaskManager {
+class TaskManager: ObservableObject {
     static let shared = TaskManager()
     
-    var tasks: [TaskItem] = [
+    @Published var tasks: [TaskItem] = [
         TaskItem(
             title: "Pick up Nicole from School",
             description: "Don't forget to bring snacks",
@@ -57,4 +57,4 @@ class TaskManager {
     func updateTask(_ task: TaskItem, at index: Int) {
         tasks[index] = task
     }
-} 
+}

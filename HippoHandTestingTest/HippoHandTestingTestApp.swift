@@ -12,6 +12,7 @@ struct HippoHandTestingTestApp: App {
 
     @State private var appModel = AppModel()
     @State private var handTrackingModel = HandTrackingModel()
+    @State private var currentCardIndex = 0
 
     var body: some Scene {
         WindowGroup {
@@ -20,7 +21,7 @@ struct HippoHandTestingTestApp: App {
         }
 
         ImmersiveSpace(id: appModel.immersiveSpaceID) {
-            ImmersiveView(handTrackingModel: handTrackingModel)
+            ImmersiveView(handTrackingModel: handTrackingModel, currentCardIndex: $currentCardIndex)
                 .environment(appModel)
                 .onAppear {
                     appModel.immersiveSpaceState = .open
@@ -30,5 +31,14 @@ struct HippoHandTestingTestApp: App {
                 }
         }
         .immersionStyle(selection: .constant(.mixed), in: .mixed)
-     }
+        
+        WindowGroup(id: "spaceWindow", for: TaskItem.self) { $task in
+            if let task = task {
+                SpaceWindowView(task: task, isPresented: .constant(true), currentCardIndex: $currentCardIndex)
+                    .background(.clear)
+            }
+        }
+        .windowResizability(.contentSize)
+
+    }
 }

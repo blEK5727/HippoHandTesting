@@ -8,10 +8,11 @@
 import SwiftUI
 
 struct HandMenuView: View {
-    @State private var taskManager = TaskManager.shared
+    @StateObject private var taskManager = TaskManager.shared
     @State private var currentIndex: Int = 0
     @State private var dragOffset: CGFloat = 0
     @State private var showingAddTask = false
+    @State private var currentCardIndex: Int = 0
     
     var body: some View {
         ZStack {
@@ -19,14 +20,14 @@ struct HandMenuView: View {
                 GeometryReader { geometry in
                     HStack(spacing: 20) {
                         ForEach(Array(taskManager.tasks.enumerated()), id: \.element.id) { index, task in
-                            let distance = CGFloat(index) - CGFloat(currentIndex) + (dragOffset / geometry.size.width)
-                            
-                            PalmDownView(task: task)
-                                .frame(width: geometry.size.width * 0.9, height: 200)
-                                .scaleEffect(1.0 - abs(distance) * 0.15)
-                                .opacity(1.0 - abs(distance) * 0.5)
-                                .offset(z: -abs(distance) * 50)
-                                .animation(.spring(response: 0.3), value: currentIndex)
+                            TaskCardView(
+                                task: task,
+                                index: index,
+                                currentIndex: currentIndex,
+                                dragOffset: dragOffset,
+                                geometry: geometry,
+                                currentCardIndex: $currentCardIndex
+                            )
                         }
                     }
                     .offset(x: -CGFloat(currentIndex) * (geometry.size.width * 0.9 + 20) + dragOffset + (geometry.size.width * 0.05))
@@ -98,6 +99,26 @@ struct HandMenuView: View {
                     .preferredColorScheme(.light)
             }
         }
+    }
+}
+
+struct TaskCardView: View {
+    let task: TaskItem
+    let index: Int
+    let currentIndex: Int
+    let dragOffset: CGFloat
+    let geometry: GeometryProxy
+    @Binding var currentCardIndex: Int
+    
+    var body: some View {
+        let distance = CGFloat(index) - CGFloat(currentIndex) + (dragOffset / geometry.size.width)
+        
+        PalmDownView(task: task, currentCardIndex: $currentCardIndex)
+            .frame(width: geometry.size.width * 0.9, height: 200)
+            .scaleEffect(1.0 - abs(distance) * 0.15)
+            .opacity(1.0 - abs(distance) * 0.5)
+            .offset(z: -abs(distance) * 50)
+            .animation(.spring(response: 0.3), value: currentIndex)
     }
 }
 

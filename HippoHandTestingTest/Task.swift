@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct TaskItem: Identifiable {
+struct TaskItem: Identifiable, Codable, Hashable {
     let id = UUID()
     var title: String
     var description: String
@@ -18,10 +18,18 @@ struct TaskItem: Identifiable {
     var endTime: Date
     var type: TaskType
     
-    enum TaskType: String, CaseIterable, Identifiable {
+    enum TaskType: String, CaseIterable, Identifiable, Codable {
         case task = "Task"
         case event = "Event"
         case list = "List"
         var id: String { rawValue }
     }
-} 
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    static func == (lhs: TaskItem, rhs: TaskItem) -> Bool {
+        lhs.id == rhs.id
+    }
+}

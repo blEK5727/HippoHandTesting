@@ -11,6 +11,8 @@ import RealityKitContent
 
 struct ImmersiveView: View {
     @State var handTrackingModel: HandTrackingModel
+    @StateObject private var taskManager = TaskManager.shared
+    @Binding var currentCardIndex: Int
     
     var body: some View {
         RealityView { content, attachments in
@@ -36,26 +38,33 @@ struct ImmersiveView: View {
         attachments: {
             Attachment(id: "hand_menu") {
                 HandMenuView()
-                    //.frame(width: 400, height: 600)
-                    //.glassBackgroundEffect()
                     .buttonStyle(.plain)
             }
             
             Attachment(id: "palm_down") {
-                PalmDownView(task: TaskItem(
-                    title: "Sample Task",
-                    description: "This is a sample task",
-                    location: "Sample Location",
-                    tag: "Sample Tag",
-                    date: Date(),
-                    startTime: Date(),
-                    endTime: Date().addingTimeInterval(3600),
-                    type: .task
-                ))
-                    //.frame(width: 400, height: 600)
-                    //.glassBackgroundEffect()
+                Group {
+                    if let task = taskManager.tasks[safe: currentCardIndex] {
+                        PalmDownView(task: task, currentCardIndex: $currentCardIndex)
+                            .id("\(currentCardIndex)-\(task.id)") // Force view update with unique ID
+                    } else {
+                        PalmDownView(task: TaskItem(
+                            title: "No Tasks",
+                            description: "Add a task to see it here",
+                            location: "",
+                            tag: "",
+                            date: Date(),
+                            startTime: Date(),
+                            endTime: Date().addingTimeInterval(3600),
+                            type: .task
+                        ), currentCardIndex: $currentCardIndex)
+                    }
+                }
+                .onChange(of: currentCardIndex) { oldValue, newValue in
+                    print("currentCardIndex changed from \(oldValue) to \(newValue)")
+                }
             }
-        }.onAppear() {
+        }
+        .onAppear() {
             Task {
                 await handTrackingModel.start()
                 await handTrackingModel.publishHandTrackingUpdates()
@@ -64,7 +73,14 @@ struct ImmersiveView: View {
     }
 }
 
+// Extension to safely access array elements
+extension Array {
+    subscript(safe index: Index) -> Element? {
+        indices.contains(index) ? self[index] : nil
+    }
+}
+
 #Preview() {
-    ImmersiveView(handTrackingModel: HandTrackingModel())
+    ImmersiveView(handTrackingModel: HandTrackingModel(), currentCardIndex: .constant(0))
         .environment(HandTrackingModel())
 }

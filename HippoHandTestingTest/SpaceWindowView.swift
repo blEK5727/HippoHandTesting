@@ -1,36 +1,9 @@
 import SwiftUI
 import RealityKit
 
-extension Color {
-    init(hex: String) {
-        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-        var int: UInt64 = 0
-        Scanner(string: hex).scanHexInt64(&int)
-        let a, r, g, b: UInt64
-        switch hex.count {
-        case 3: // RGB (12-bit)
-            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
-        case 6: // RGB (24-bit)
-            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
-        case 8: // ARGB (32-bit)
-            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
-        default:
-            (a, r, g, b) = (255, 0, 0, 0)
-        }
-        self.init(
-            .sRGB,
-            red: Double(r) / 255,
-            green: Double(g) / 255,
-            blue:  Double(b) / 255,
-            opacity: Double(a) / 255
-        )
-    }
-}
-
-struct PalmDownView: View {
+struct SpaceWindowView: View {
     let task: TaskItem
-    @State private var showSpaceWindow = false
-    @Environment(\.openWindow) private var openWindow
+    @Binding var isPresented: Bool
     @Binding var currentCardIndex: Int
     @StateObject private var taskManager = TaskManager.shared
     
@@ -38,23 +11,23 @@ struct PalmDownView: View {
         ZStack {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(task.title)
+                    Text(taskManager.tasks[0].title)  // Always show first task
                         .font(.title2).bold()
                         .foregroundColor(.black)
                         .fixedSize(horizontal: false, vertical: true)
                     HStack(spacing: 4) {
-                        Text(task.date.formatted(date: .long, time: .omitted))
+                        Text(taskManager.tasks[0].date.formatted(date: .long, time: .omitted))
                             .font(.subheadline)
                             .foregroundColor(.gray)
-                        Text(task.startTime.formatted(date: .omitted, time: .shortened))
+                        Text(taskManager.tasks[0].startTime.formatted(date: .omitted, time: .shortened))
                             .font(.subheadline)
                             .foregroundColor(.gray)
                     }
                     // Labels together in a wrapping frame
                     VStack(alignment: .leading, spacing: 8) {
-                        if !task.location.isEmpty {
+                        if !taskManager.tasks[0].location.isEmpty {
                             Label {
-                                Text(task.location)
+                                Text(taskManager.tasks[0].location)
                                     .font(.subheadline)
                             } icon: {
                                 Image(systemName: "mappin.and.ellipse")
@@ -65,10 +38,10 @@ struct PalmDownView: View {
                             .foregroundColor(Color(red: 148/255, green: 133/255, blue: 255/255))
                             .clipShape(RoundedRectangle(cornerRadius: 8))
                         }
-                        if !task.tag.isEmpty {
+                        if !taskManager.tasks[0].tag.isEmpty {
                             Label {
-                                Text(task.tag)
-                                .font(.subheadline)
+                                Text(taskManager.tasks[0].tag)
+                                    .font(.subheadline)
                             } icon: {
                                 Image(systemName: "tag")
                             }
@@ -92,11 +65,7 @@ struct PalmDownView: View {
                     .padding(0)
                     Spacer()
                     Button(action: {
-                        // Update currentCardIndex to show next task
-                        withAnimation {
-                            currentCardIndex = 1
-                        }
-                        openWindow(id: "spaceWindow", value: task)
+                        isPresented = false
                     }) {
                         Image(systemName: "bubble.right")
                             .font(.system(size: 12))
@@ -105,6 +74,7 @@ struct PalmDownView: View {
                             .background(Color.gray.opacity(0.1))
                             .clipShape(Circle())
                     }
+                    .frame(width: 0, height: 0)
                     .buttonStyle(.plain)
                 }
             }
@@ -118,17 +88,18 @@ struct PalmDownView: View {
 }
 
 #Preview {
-    PalmDownView(
+    SpaceWindowView(
         task: TaskItem(
-            title: "Pick up Nicole from School",
-            description: "",
-            location: "Lombardo High School",
-            tag: "Family",
+            title: "Sample Task",
+            description: "This is a sample task",
+            location: "Sample Location",
+            tag: "Sample Tag",
             date: Date(),
             startTime: Date(),
             endTime: Date().addingTimeInterval(3600),
             type: .task
         ),
+        isPresented: .constant(true),
         currentCardIndex: .constant(0)
     )
 }
