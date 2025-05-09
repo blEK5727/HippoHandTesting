@@ -11,23 +11,23 @@ struct SpaceWindowView: View {
         ZStack {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(taskManager.tasks[0].title)  // Always show first task
+                    Text(task.title)  // Use the passed task
                         .font(.title2).bold()
                         .foregroundColor(.black)
                         .fixedSize(horizontal: false, vertical: true)
                     HStack(spacing: 4) {
-                        Text(taskManager.tasks[0].date.formatted(date: .long, time: .omitted))
+                        Text(task.date.formatted(date: .long, time: .omitted))
                             .font(.subheadline)
                             .foregroundColor(.gray)
-                        Text(taskManager.tasks[0].startTime.formatted(date: .omitted, time: .shortened))
+                        Text(task.startTime.formatted(date: .omitted, time: .shortened))
                             .font(.subheadline)
                             .foregroundColor(.gray)
                     }
                     // Labels together in a wrapping frame
                     VStack(alignment: .leading, spacing: 8) {
-                        if !taskManager.tasks[0].location.isEmpty {
+                        if !task.location.isEmpty {
                             Label {
-                                Text(taskManager.tasks[0].location)
+                                Text(task.location)
                                     .font(.subheadline)
                             } icon: {
                                 Image(systemName: "mappin.and.ellipse")
@@ -38,9 +38,9 @@ struct SpaceWindowView: View {
                             .foregroundColor(Color(red: 148/255, green: 133/255, blue: 255/255))
                             .clipShape(RoundedRectangle(cornerRadius: 8))
                         }
-                        if !taskManager.tasks[0].tag.isEmpty {
+                        if !task.tag.isEmpty {
                             Label {
-                                Text(taskManager.tasks[0].tag)
+                                Text(task.tag)
                                     .font(.subheadline)
                             } icon: {
                                 Image(systemName: "tag")

@@ -43,9 +43,9 @@ struct ImmersiveView: View {
             
             Attachment(id: "palm_down") {
                 Group {
-                    if let task = taskManager.tasks[safe: currentCardIndex] {
-                        PalmDownView(task: task, currentCardIndex: $currentCardIndex)
-                            .id("\(currentCardIndex)-\(task.id)") // Force view update with unique ID
+                    if let nextTask = taskManager.getNextUnshownTask() {
+                        PalmDownView(task: nextTask, currentCardIndex: $currentCardIndex)
+                            .id("\(currentCardIndex)-\(nextTask.id)") // Force view update with unique ID
                     } else {
                         PalmDownView(task: TaskItem(
                             title: "No Tasks",

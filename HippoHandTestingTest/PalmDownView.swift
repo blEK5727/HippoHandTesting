@@ -92,9 +92,12 @@ struct PalmDownView: View {
                     .padding(0)
                     Spacer()
                     Button(action: {
-                        // Update currentCardIndex to show next task
-                        withAnimation {
-                            currentCardIndex = 1
+                        // Mark current task as shown and get next unshown task
+                        taskManager.markTaskAsShown(task)
+                        if let nextTask = taskManager.getNextUnshownTask() {
+                            withAnimation {
+                                currentCardIndex = taskManager.tasks.firstIndex(where: { $0.id == nextTask.id }) ?? 0
+                            }
                         }
                         openWindow(id: "spaceWindow", value: task)
                     }) {

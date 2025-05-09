@@ -12,6 +12,7 @@ struct HandMenuView: View {
     @State private var currentIndex: Int = 0
     @State private var dragOffset: CGFloat = 0
     @State private var showingAddTask = false
+    @State private var showingTaskList = false
     @State private var currentCardIndex: Int = 0
     
     var body: some View {
@@ -55,7 +56,9 @@ struct HandMenuView: View {
                 
                 // Add the row of 3 buttons below the cards
                 HStack(spacing: 32) {
-                    Button(action: {}) {
+                    Button(action: {
+                        showingTaskList = true
+                    }) {
                         Image(systemName: "book.closed") // Contact icon
                             .font(.system(size: 24, weight: .medium))
                             .foregroundColor(.black.opacity(0.7))
@@ -93,6 +96,14 @@ struct HandMenuView: View {
             
             if showingAddTask {
                 AddTaskView(taskManager: taskManager, isPresented: $showingAddTask)
+                    .frame(width: 600, height: 600)
+                    .cornerRadius(20)
+                    .shadow(radius: 10)
+                    .preferredColorScheme(.light)
+            }
+            
+            if showingTaskList {
+                TaskListView(taskManager: taskManager, isPresented: $showingTaskList)
                     .frame(width: 600, height: 600)
                     .cornerRadius(20)
                     .shadow(radius: 10)

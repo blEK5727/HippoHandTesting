@@ -46,8 +46,16 @@ class TaskManager: ObservableObject {
         )
     ]
     
+    @Published var unshownTasks: [TaskItem] = []
+    
+    init() {
+        // Initialize unshownTasks with all tasks
+        unshownTasks = tasks
+    }
+    
     func addTask(_ task: TaskItem) {
         tasks.insert(task, at: 0)
+        unshownTasks.insert(task, at: 0)
     }
     
     func removeTask(at index: Int) {
@@ -56,5 +64,15 @@ class TaskManager: ObservableObject {
     
     func updateTask(_ task: TaskItem, at index: Int) {
         tasks[index] = task
+    }
+    
+    func markTaskAsShown(_ task: TaskItem) {
+        if let index = unshownTasks.firstIndex(where: { $0.id == task.id }) {
+            unshownTasks.remove(at: index)
+        }
+    }
+    
+    func getNextUnshownTask() -> TaskItem? {
+        return unshownTasks.first
     }
 }
